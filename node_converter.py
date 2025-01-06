@@ -1,3 +1,5 @@
+from functools import cache
+
 import libcst as cst
 from libcst import metadata
 
@@ -24,6 +26,7 @@ def try_resolve_scope_name(scope) -> str | None:
     except UnnamedScopeError:
         return None
 
+@cache
 def resolve_scope_name(scope: metadata.Scope) -> str:
     """Resolve scope path as a dot-separated chain of child scope names.
     
