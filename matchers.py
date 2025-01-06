@@ -1,3 +1,14 @@
+"""
+This module describes which statements we would like to isolate before replacing them.
+
+The global_statement_matcher is a matcher that matches all global statements that contain an assignment.
+Out of these statements, we are interested in the first occurence of a variable name in a given scope.
+From this first occurence, we would like to save the name of the variable, the type of the variable if it is explicitly annotated, and the value assigned to the variable.
+In addition, we would like to save the trailing line comment associated with the assignment.
+
+However, if the trailing line comment contains the phrase "no param", the full statement will be ignored.
+"""
+
 
 import re
 from libcst import matchers as m, metadata
