@@ -90,7 +90,7 @@ class CodeWrapper:
     def list_scope_names(self) -> list[str]:
         return list(self._get_scopes().keys())
 
-    def analyze_assigns(self, scope_name: str = None):
+    def analyze_assigns(self, scope_name: str = None) -> list[AssignementWrapper]:
         assignements = []
         for match in m.findall(self.wrapper, statement_matcher):
             assignement = AssignementWrapper(match, self.wrapper)
