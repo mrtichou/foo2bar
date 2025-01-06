@@ -4,7 +4,6 @@ This module defines a metadata provider that saves whether a name occurs for the
 
 import libcst as cst
 from libcst.metadata import BatchableMetadataProvider, ScopeProvider, Scope
-import libcst.matchers as m
 
 class FirstAssignInScopeProvider(BatchableMetadataProvider):
     METADATA_DEPENDENCIES = (ScopeProvider, )

@@ -4,8 +4,8 @@ from typing import Any, Mapping
 import libcst as cst
 from libcst import matchers as m, metadata
 
-from matchers import statement_matcher
-from providers import FirstAssignInScopeProvider
+from .matchers import statement_matcher
+from .providers import FirstAssignInScopeProvider
 
 class Substitutor(m.MatcherDecoratableTransformer):
     METADATA_DEPENDENCIES = (metadata.ScopeProvider, FirstAssignInScopeProvider)

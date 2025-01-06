@@ -11,7 +11,7 @@ However, if the trailing line comment contains the phrase "no param", the full s
 
 import re
 from libcst import matchers as m, metadata
-from providers import FirstAssignInScopeProvider
+from .providers import FirstAssignInScopeProvider
 
 assign_name = m.Name(
     # Save the name of the variable

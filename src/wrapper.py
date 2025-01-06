@@ -4,9 +4,9 @@ from pathlib import Path
 from libcst import metadata, matchers as m
 import libcst as cst
 
-from matchers import statement_matcher
-from node_converter import node_to_string, try_resolve_scope_name
-from transformers import Substitutor
+from .matchers import statement_matcher
+from .node_converter import node_to_string, try_resolve_scope_name
+from .transformers import Substitutor
 
 
 class AssignementWrapper:

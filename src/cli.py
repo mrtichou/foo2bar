@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Literal, Type
 
 
-from wrapper import AssignementWrapper, CodeWrapper
-from evallib import safe_eval, try_annotation_eval, try_safe_type_eval
+from .wrapper import AssignementWrapper, CodeWrapper
+from .evallib import safe_eval, try_annotation_eval, try_safe_type_eval
 
 
 class RawExpr(str):
@@ -107,7 +107,7 @@ def assignement_to_args(
 
 def parse_arguments(
     argv: list = None, dtype_inference: DtypeInference = None
-) -> Namespace:
+) -> dict:
     """Parse arguments from a script file.
 
     Every gobal assignement in the script file will be parsed as an argument, unless the comment contains "NO PARAM" or "no param".
@@ -129,18 +129,17 @@ def parse_arguments(
 
     # ignore errors. exit_on_errors=False doesn't work for some reason
     base_parser.error = lambda s: None
-    args, other_argv = base_parser.parse_known_args(args=argv)
+    base_args, other_argv = base_parser.parse_known_args(args=argv)
 
-    full_parser = ArgumentParser(
-        parents=[base_parser],
-        add_help=True,
-        exit_on_error=True,
+    script_parser = ArgumentParser(
+        add_help=False,
+        exit_on_error=False,
     )
 
-    if getattr(args, "script", None) is not None and Path(args.script).exists():
-        argument_group = full_parser.add_argument_group("Script options")
+    if getattr(base_args, "script", None) is not None and Path(base_args.script).exists():
+        argument_group = script_parser.add_argument_group("script options")
 
-        wrapper = CodeWrapper.from_file(args.script)
+        wrapper = CodeWrapper.from_file(base_args.script)
         assignements = wrapper.analyze_assigns(wrapper.GLOBAL_SCOPE)
 
         for assignement in assignements:
@@ -152,21 +151,26 @@ def parse_arguments(
             )
             argument_group.add_argument(*args, **kwargs)
 
-    return full_parser.parse_args()
-
-
-def namespace_to_dict(arguments: Namespace) -> dict:
-    return vars(arguments)
-
-
-def get_set_arguments(arguments: Namespace) -> dict:
-    return {k: v for k, v in namespace_to_dict(arguments).items() if v is not UNSET}
+    full_parser = ArgumentParser(
+        parents=[base_parser, script_parser],
+        add_help=True,
+        exit_on_error=True,
+    )
+    
+    # display help message if needed
+    full_parser.parse_args(args=argv)
+    
+    return {
+        **vars(base_args), # "script", "output"
+        "arguments": vars(script_parser.parse_args(other_argv)), # all other arguments
+    }
 
 
 def _test():
     args = parse_arguments(dtype_inference="both")
-    print(namespace_to_dict(args).keys())
-    print(get_set_arguments(args))
+    print(args.keys())
+    print(args["arguments"].keys())
+    print({k: v for k, v in args["arguments"].items() if v is not UNSET})
 
 
 if __name__ == "__main__":
