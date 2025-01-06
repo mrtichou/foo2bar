@@ -12,6 +12,11 @@ from RestrictedPython import compile_restricted_eval, safe_builtins, limited_bui
 # this constant is not allcaps for naming consistency with RestrictedPython
 type_builtins = {k:v for k,v in dict[str].items(builtins.__dict__) if isinstance(v, Type)}
 
+class SafeEvaluationError(Exception):
+    def __init__(self, expression: str, *args, **kwargs):
+        super().__init__(f"Unsafe expression: {expression!r}", *args, **kwargs)
+        self.expression = expression
+
 
 def _concat_globals(*dicts: dict[str, Any]) -> dict[str, Any]:
     """Concatenate multiple dictionaries into one, and nest them under '__builtins__' key."""
@@ -33,11 +38,17 @@ def annotation_eval(annotation: str, locals: dict[str] = None) -> Type:
 
 def safe_eval(expr: str, locals: dict[str] = None):
     """Safely evaluate an expression."""
-    return eval(
-        compile_restricted_eval(expr).code, 
-        _concat_globals(safe_builtins, limited_builtins, utility_builtins),
-        locals
-    )
+    try:
+        compiled = compile_restricted_eval(expr)
+        if compiled.errors:
+            raise SyntaxError(compiled.errors)
+        return eval(
+            compiled.code, 
+            _concat_globals(safe_builtins, limited_builtins, utility_builtins),
+            locals
+        )
+    except Exception as e:
+        raise SafeEvaluationError(expr) from e
     
 
 def safe_type_eval(expr: str, locals: dict[str] = None) -> Type:
