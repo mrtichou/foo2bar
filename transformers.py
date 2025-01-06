@@ -11,10 +11,16 @@ class GlobalSubstitution(m.MatcherDecoratableTransformer):
     def __init__(self, mapping: Mapping[str, str]) -> None:
         super().__init__()
         self.mapping = mapping
+        self._check_if_values_are_strings()
         
     @classmethod
     def from_repr(cls, typed_mapping: Mapping[str, Any]) -> "GlobalSubstitution":
         return cls({k:repr(v) for k, v in typed_mapping.items()})
+    
+    def _check_if_values_are_strings(self):
+        for v in self.mapping.values():
+            if not isinstance(v, str):
+                raise ValueError(f"All values in the mapping must be strings. Got {v} instead. Maybe have a look at the `from_repr` method.")
     
     def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> None:
         self._current_data = m.extract(node, global_statement_matcher, metadata_resolver=self)
