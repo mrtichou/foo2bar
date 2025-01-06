@@ -3,10 +3,10 @@ from typing import Any, Mapping
 import libcst as cst
 from libcst import matchers as m, metadata
 from matchers import global_statement_matcher
-from providers import FirstVisitInScopeProvider
+from providers import FirstAssignInScopeProvider
 
 class GlobalSubstitution(m.MatcherDecoratableTransformer):
-    METADATA_DEPENDENCIES = (metadata.ScopeProvider, FirstVisitInScopeProvider)
+    METADATA_DEPENDENCIES = (metadata.ScopeProvider, FirstAssignInScopeProvider)
     
     def __init__(self, mapping: Mapping[str, str]) -> None:
         super().__init__()

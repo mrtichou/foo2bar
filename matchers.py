@@ -12,13 +12,13 @@ However, if the trailing line comment contains the phrase "no param", the full s
 
 import re
 from libcst import matchers as m, metadata
-from providers import FirstVisitInScopeProvider
+from providers import FirstAssignInScopeProvider
 
 assign_name = m.Name(
     # Save the name of the variable
     value=m.SaveMatchedNode(m.DoNotCare(), "name"),
     # We care only about first occurence of a variable name in a given scope
-    metadata=m.MatchMetadata(FirstVisitInScopeProvider, True)
+    metadata=m.MatchMetadata(FirstAssignInScopeProvider, True)
 )
 
 # Save the type of the variable when explicitly annotated
