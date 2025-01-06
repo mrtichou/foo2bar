@@ -1,3 +1,6 @@
+# This .gitignore file is based on the Python.gitignore template from the GitHub gitignore repository.
+# Source: https://github.com/github/gitignore/blob/main/Python.gitignore
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
