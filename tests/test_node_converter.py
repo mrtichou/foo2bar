@@ -2,7 +2,7 @@ import unittest
 import libcst as cst
 from libcst import metadata
 
-from ersatz.node_converter import (
+from fusible.node_converter import (
     node_to_string,
     scope_name_is_resolvable,
     try_resolve_scope_name,
