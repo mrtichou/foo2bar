@@ -18,6 +18,12 @@ def scope_name_is_resolvable(scope):
         return False
 
 
+def try_resolve_scope_name(scope) -> str | None:
+    try:
+        return resolve_scope_name(scope)
+    except UnnamedScopeError:
+        return None
+
 def resolve_scope_name(scope: metadata.Scope) -> str:
     """Resolve scope path as a dot-separated chain of child scope names.
     
