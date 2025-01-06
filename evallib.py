@@ -1,5 +1,6 @@
 
 import builtins
+import logging
 from functools import wraps
 from typing import Any, Type
 
@@ -8,6 +9,7 @@ from libcst import matchers as m
 from RestrictedPython import compile_restricted_eval, safe_builtins, limited_builtins, utility_builtins
 
 
+# this constant is not allcaps for naming consistency with RestrictedPython
 type_builtins = {k:v for k,v in dict[str].items(builtins.__dict__) if isinstance(v, Type)}
 
 
@@ -37,8 +39,26 @@ def safe_eval(expr: str, locals: dict[str] = None):
         locals
     )
     
-def safe_type_eval(expr: str,locals: dict[str] = None) -> Type:
+
+def safe_type_eval(expr: str, locals: dict[str] = None) -> Type:
+    """Safely evaluate the data type of a given expression."""
     return type(safe_eval(expr, locals))
+
+
+def try_safe_type_eval(expr: str, locals: dict[str] = None) -> Type | None:
+    try:
+        return safe_type_eval(expr, locals=locals)
+    except Exception as e:
+        logging.debug(f"Unable to evaluate dtype from '{expr}': {e}")
+        return None
+
+
+def try_annotation_eval(expr: str, locals: dict[str]=None) -> Type | None:
+    try:
+        return annotation_eval(expr, locals=locals)
+    except Exception as e:
+        logging.debug(f"Unable to evaluate dtype from annotation '{expr}': {e}")
+        return None
 
 
 def main() -> None:
