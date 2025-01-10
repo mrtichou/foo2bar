@@ -4,7 +4,7 @@ from pathlib import Path
 
 import libcst as cst
 
-from fusible.wrapper import CodeWrapper, AssignementWrapper
+from foo2bar.wrapper import CodeWrapper, AssignementWrapper
 
 class TestCodeWrapper(unittest.TestCase):
     def setUp(self):

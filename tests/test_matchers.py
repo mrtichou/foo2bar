@@ -4,7 +4,7 @@ from textwrap import dedent
 import libcst as cst
 from libcst import matchers as m, metadata
 
-from fusible.matchers import statement_matcher
+from foo2bar.matchers import statement_matcher
 
 
 class TestMatchers(unittest.TestCase):

@@ -2,7 +2,7 @@ import unittest
 
 from libcst._exceptions import ParserSyntaxError
 
-from fusible.evallib import (
+from foo2bar.evallib import (
     SafeEvaluationError,
     annotation_eval,
     safe_eval,
