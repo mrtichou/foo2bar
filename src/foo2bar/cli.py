@@ -1,10 +1,13 @@
+import logging
 import types
 import typing
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import Literal, Type
 
 
+import foo2bar.logging as logging
+from foo2bar.logging import logger
 from .wrapper import AssignementWrapper, CodeWrapper
 from .evallib import safe_eval, try_annotation_eval, try_safe_type_eval
 
@@ -106,7 +109,7 @@ def assignement_to_args(
 
 
 def parse_arguments(
-    argv: list = None, dtype_inference: DtypeInference = None
+    argv: list = None
 ) -> dict:
     """Parse arguments from a script file.
 
@@ -118,19 +121,21 @@ def parse_arguments(
         dtype_inference (Literal["none", "annotation", "value", "both"], optional): How to infer the data type of the arguments. Defaults to None.
 
     Returns:
-        Namespace: Parsed arguments as a `Namespace` object.
+        dict: A dictionary containing the script path, the output path, and the parsed arguments.
     """
     base_parser = ArgumentParser(add_help=False)
 
     base_parser.add_argument("script", type=Path, help="path to the script to parse.")
+    base_parser.add_argument("mode", type=str, choices=["raw", "typed"], default="raw", help="argument type interpretation mode. See readme for more information.")
     base_parser.add_argument(
         "--output", "-o", type=Path, help="path to the output file."
     )
-
+    
     # ignore errors. exit_on_errors=False doesn't work for some reason
     base_parser.error = lambda s: None
     base_args, other_argv = base_parser.parse_known_args(args=argv)
-
+    dtype_inference = "none" if base_args.mode == "raw" else "both"
+    
     script_parser = ArgumentParser(
         add_help=False,
         exit_on_error=False,
@@ -161,10 +166,40 @@ def parse_arguments(
     full_parser.parse_args(args=argv)
     
     return {
-        **vars(base_args), # "script", "output"
+        **vars(base_args), # "mode", "script", "output"
         "arguments": vars(script_parser.parse_args(other_argv)), # all other arguments
     }
 
+def substitute_global(script: Path, mapping: dict) -> tuple[str, dict[str, str]]:
+    wrapper = CodeWrapper.from_file(script)
+    
+    remaining = wrapper.substitute_assign_values_global(mapping)
+    
+    return wrapper.code, remaining
+
+
+def main():
+    args = parse_arguments()
+    logger.setLevel(logging.INFO)
+    
+    mapping = {k: v for k, v in args["arguments"].items() if v is not UNSET}
+    
+    if args["mode"] == "typed":
+        mapping = {k: repr(v) for k, v in mapping.items()}
+    
+    new_script, remaining = substitute_global(
+        script=args["script"], 
+        mapping=mapping
+    )
+    
+    if remaining:
+        logger.warning("Some variables were not substituted:" + ", ".join(remaining.keys()))
+    
+    if isinstance(args["output"], Path):
+        args["output"].write_text(new_script)
+        logger.info(f"Script written to {args['output']}")
+    else:
+        print(new_script)
 
 def _test():
     args = parse_arguments(dtype_inference="both")
